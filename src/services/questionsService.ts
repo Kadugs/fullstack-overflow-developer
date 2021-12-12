@@ -1,5 +1,6 @@
 import { validateNewQuestion } from '../validations/questionsServiceValidation';
 import BodyError from '../error/BodyError';
+import ParamError from '../error/ParamError';
 import Question from '../interfaces/Question';
 import * as questionsRepository from '../repositories/questionsRepository';
 
@@ -30,4 +31,12 @@ async function addNewQuestion({
   return id;
 }
 
-export { addNewQuestion };
+async function getQuestion(id: string) {
+  if (Number.isNaN(Number(id))) {
+    throw new ParamError('invalid id');
+  }
+  const question = await questionsRepository.selectQuestionById(id);
+  return question;
+}
+
+export { addNewQuestion, getQuestion };

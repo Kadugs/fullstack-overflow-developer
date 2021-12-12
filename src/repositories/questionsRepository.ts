@@ -1,8 +1,21 @@
 import dayjs from 'dayjs';
 import connection from '../database';
 import Question from '../interfaces/Question';
+import QuestionError from '../error/QuestionError';
 import * as studentRepository from './studentRepository';
 import * as tagsRepository from './tagsRepository';
+
+interface Answer {
+  question: string;
+  student: string;
+  class: string;
+  tags: string[];
+  answered: boolean;
+  submitAt: any;
+  answeredBy?: string;
+  answeredAt?: string;
+  answer?: string;
+}
 
 async function insertNewQuestion({
   question,
@@ -28,5 +41,42 @@ async function insertNewQuestion({
   });
   return rowQuestionId.rows[0].id;
 }
+async function selectQuestionById(id: string) {
+  const result = await connection.query(
+    `SELECT
+     questions.question, users.student, classes.class,
+     questions.answered, questions.submit_at as "submitAt", tags.tag_name as "tagName",
+     answers.answered_by as "answeredBy", answers.answered_at as "answeredAt"
+     FROM questions
+     JOIN users ON questions.user_id = users.id
+     JOIN classes ON users.class_id = classes.id
+     JOIN question_tags ON questions.id = question_tags.question_id
+     JOIN tags ON question_tags.tag_id = tags.id
+     LEFT JOIN answers ON questions.id = answers.question_id
+     WHERE questions.id = $1;`,
+    [id],
+  );
+  if (result.rowCount === 0) {
+    throw new QuestionError('not found');
+  }
+  const mainInfos = result.rows[0];
+  let questionInfos: Answer = {
+    question: mainInfos.question,
+    student: mainInfos.student,
+    class: mainInfos.class,
+    tags: result.rows.map((item) => item.tagName),
+    answered: mainInfos.answered,
+    submitAt: mainInfos.submitAt,
+  };
+  if (questionInfos.answered) {
+    questionInfos = {
+      ...questionInfos,
+      answeredBy: mainInfos.answeredBy,
+      answeredAt: mainInfos.answeredAt,
+      answer: mainInfos.answer,
+    };
+  }
+  return questionInfos;
+}
 
-export { insertNewQuestion };
+export { insertNewQuestion, selectQuestionById };
