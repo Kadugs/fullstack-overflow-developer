@@ -9,16 +9,16 @@ async function addQuestion(req: Request, res: Response, next: any) {
     return res.sendStatus(400);
   }
   try {
-    await questionsService.addNewQuestion({
+    const id = await questionsService.addNewQuestion({
       question,
       student,
       studentClass,
       tags,
     });
-    return res.sendStatus(200);
+    return res.sendStatus(201).send(id);
   } catch (err) {
     if (err instanceof BodyError) {
-      return res.status(400).send(err.message);
+      return res.sendStatus(400).send(err.message);
     }
     return next(err);
   }
