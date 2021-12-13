@@ -25,9 +25,9 @@ async function insertNewTag(tag: string): Promise<number> {
   const result = await connection.query(
     `
   INSERT INTO tags
-   tag_name
+   (tag_name)
    VALUES ($1)
-   RETURNING id`,
+   RETURNING *;`,
     [tag],
   );
   return result.rows[0].id;

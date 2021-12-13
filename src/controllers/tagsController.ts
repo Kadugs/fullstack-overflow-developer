@@ -8,9 +8,15 @@ async function postTag(req: Request, res: Response, next: any) {
     return res.sendStatus(400);
   }
   try {
-    await tagsService.postTag(tag);
+    const id = await tagsService.postTag(tag);
+    if (!id) {
+      return res.sendStatus(400);
+    }
     return res.sendStatus(201);
   } catch (err) {
+    if (err instanceof ConflictError) {
+      return res.sendStatus(404);
+    }
     return next(err);
   }
 }
@@ -19,9 +25,6 @@ async function getTags(req: Request, res: Response, next: any) {
     const tagList = await tagsService.getTags();
     return res.send(tagList);
   } catch (err) {
-    if (err instanceof ConflictError) {
-      return res.sendStatus(404);
-    }
     return next(err);
   }
 }

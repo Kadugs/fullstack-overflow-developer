@@ -7,15 +7,15 @@ import connection from '../../src/database';
 import * as questionFactory from '../factories/questionFactory';
 import * as studentFactory from '../factories/studentFactory';
 
-// afterAll(async () => {
-//   await connection.query(`
-//   DELETE FROM answers;
-//   DELETE FROM sessions;
-//   DELETE FROM question_tags;
-//   DELETE FROM questions;
-//   DELETE FROM users;
-//   `);
-// });
+afterAll(async () => {
+  await connection.query(`
+  DELETE FROM answers;
+  DELETE FROM sessions;
+  DELETE FROM question_tags;
+  DELETE FROM questions;
+  DELETE FROM users;
+  `);
+});
 describe('question post', () => {
   it('should return 400 for invalid params', async () => {
     const result = await supertest(app).post('/questions');
@@ -129,6 +129,19 @@ describe('test add user', () => {
     };
     const result = await supertest(app).post('/users').send(body);
     expect(result.status).toBe(200);
+  });
+});
+describe('test tags', () => {
+  it('should return 200 for get tags', async () => {
+    const result = await supertest(app).get('/tags');
+    expect(result.status).toBe(200);
+  });
+  it('should return 201 for valid params', async () => {
+    const body = {
+      tag: faker.name.findName(),
+    };
+    const result = await supertest(app).post('/tags').send(body);
+    expect(result.status).toBe(201);
   });
 });
 
