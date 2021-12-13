@@ -23,6 +23,9 @@ async function addQuestion(req: Request, res: Response, next: any) {
     if (err instanceof BodyError) {
       return res.sendStatus(400).send(err.message);
     }
+    if (err instanceof ParamError) {
+      return res.sendStatus(404);
+    }
     return next(err);
   }
 }

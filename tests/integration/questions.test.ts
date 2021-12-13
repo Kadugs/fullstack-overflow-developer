@@ -109,6 +109,20 @@ describe('return no answered questions', () => {
     expect(result.status).toBe(200);
   });
 });
+describe('test add user', () => {
+  it('should return 400 for invalid user', async () => {
+    const result = await supertest(app).post('/users');
+    expect(result.status).toBe(400);
+  });
+  it('should return 404 for invalid class', async () => {
+    const body = {
+      name: faker.name.findName(),
+      class: 1000,
+    };
+    const result = await supertest(app).post('/users').send(body);
+    expect(result.status).toBe(404);
+  });
+});
 
 afterAll(() => {
   connection.end();
