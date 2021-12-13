@@ -7,8 +7,9 @@ import connection from '../../src/database';
 import * as questionFactory from '../factories/questionFactory';
 import * as studentFactory from '../factories/studentFactory';
 
-beforeAll(async () => {
+afterAll(async () => {
   await connection.query(`
+  DELETE FROM answers;
   DELETE FROM sessions;
   DELETE FROM question_tags;
   DELETE FROM questions;
@@ -17,8 +18,7 @@ beforeAll(async () => {
 });
 describe('question post', () => {
   it('should return 400 for invalid params', async () => {
-    const body = {};
-    const result = await supertest(app).post('/questions').send(body);
+    const result = await supertest(app).post('/questions');
     expect(result.status).toBe(400);
   });
   it('should return 201 for valid params', async () => {
@@ -34,10 +34,6 @@ describe('question post', () => {
 });
 
 describe('get question by id', () => {
-  let id: string = '';
-  beforeAll(async () => {
-    id = await questionFactory.createQuestion();
-  });
   it('should returns 400 for invalid param', async () => {
     const result = await supertest(app).get(
       `/questions/${faker.random.word()}`,
@@ -49,6 +45,7 @@ describe('get question by id', () => {
     expect(result.status).toBe(404);
   });
   it('should return 200 for success', async () => {
+    const id = await questionFactory.createQuestion();
     const result = await supertest(app).get(`/questions/${id}`);
     expect(result.status).toBe(200);
   });
@@ -90,6 +87,26 @@ describe('post answer', () => {
       .send(body)
       .set('Authorization', `Bearer ${token}`);
     expect(result.status).toBe(404);
+  });
+  it('should return 201 for valid answer', async () => {
+    const token: string = await studentFactory.createToken();
+    const questionId: string = await questionFactory.createQuestion();
+    const body = {
+      answer: faker.random.words(),
+    };
+    const result = await supertest(app)
+      .post(`/questions/${questionId}`)
+      .send(body)
+      .set('Authorization', `Bearer ${token}`);
+    expect(result.status).toBe(201);
+  });
+});
+
+describe('return no answered questions', () => {
+  it('should return 200', async () => {
+    await questionFactory.createQuestion();
+    const result = await supertest(app).get('/questions');
+    expect(result.status).toBe(200);
   });
 });
 

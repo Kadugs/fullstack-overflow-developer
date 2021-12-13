@@ -26,6 +26,7 @@ async function addQuestion(req: Request, res: Response, next: any) {
     return next(err);
   }
 }
+
 async function getQuestion(req: Request, res: Response, next: any) {
   const { id } = req.params;
   if (!id) {
@@ -45,4 +46,16 @@ async function getQuestion(req: Request, res: Response, next: any) {
   }
 }
 
-export { addQuestion, getQuestion };
+async function getNoAnsweredQuestions(req: Request, res: Response, next: any) {
+  try {
+    const questions = await questionsService.getNoAnsweredQuestions();
+    return res.send(questions).status(200);
+  } catch (err) {
+    if (err instanceof QuestionError) {
+      return res.sendStatus(404);
+    }
+    return next(err);
+  }
+}
+
+export { addQuestion, getQuestion, getNoAnsweredQuestions };

@@ -4,18 +4,7 @@ import Question from '../interfaces/Question';
 import QuestionError from '../error/QuestionError';
 import * as studentRepository from './studentRepository';
 import * as tagsRepository from './tagsRepository';
-
-interface Answer {
-  question: string;
-  student: string;
-  class: string;
-  tags: string[];
-  answered: boolean;
-  submitAt: any;
-  answeredBy?: string;
-  answeredAt?: string;
-  answer?: string;
-}
+import Answer from '../interfaces/Answer';
 
 async function insertNewQuestion({
   question,
@@ -41,6 +30,7 @@ async function insertNewQuestion({
   });
   return rowQuestionId.rows[0].id;
 }
+
 async function selectQuestionById(id: string) {
   const result = await connection.query(
     `SELECT
@@ -79,4 +69,15 @@ async function selectQuestionById(id: string) {
   return questionInfos;
 }
 
-export { insertNewQuestion, selectQuestionById };
+async function getNoAnsweredQuestionsOnDb() {
+  const noAnsweredQuestions = await connection.query(`
+    SELECT questions.id, questions.question, users.student, classes.class, questions.submit_at as "submitAt"
+    FROM questions
+    JOIN users ON questions.user_id = users.id
+    JOIN classes ON users.class_id = classes.id
+    WHERE questions.answered = false;
+  `);
+  return noAnsweredQuestions.rows;
+}
+
+export { insertNewQuestion, selectQuestionById, getNoAnsweredQuestionsOnDb };

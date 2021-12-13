@@ -1,6 +1,7 @@
 import { validateNewQuestion } from '../validations/questionsServiceValidation';
 import BodyError from '../error/BodyError';
 import ParamError from '../error/ParamError';
+import QuestionError from '../error/QuestionError';
 import Question from '../interfaces/Question';
 import * as questionsRepository from '../repositories/questionsRepository';
 
@@ -39,4 +40,13 @@ async function getQuestion(id: string) {
   return question;
 }
 
-export { addNewQuestion, getQuestion };
+async function getNoAnsweredQuestions() {
+  const noAnsweredQuestions =
+    await questionsRepository.getNoAnsweredQuestionsOnDb();
+  if (!noAnsweredQuestions) {
+    throw new QuestionError('Questions not found');
+  }
+  return noAnsweredQuestions;
+}
+
+export { addNewQuestion, getQuestion, getNoAnsweredQuestions };
