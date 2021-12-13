@@ -27,6 +27,13 @@ async function insertNewAnswer({ id, answer, token }: PostAnswer) {
   `,
     [id, userId, now, answer],
   );
+  await connection.query(
+    `
+    UPDATE answers
+     SET answered = true
+     WHERE id = $1`,
+    [result.rows[0].id],
+  );
   return result.rows[0];
 }
 
