@@ -7,5 +7,5 @@ export default async function ServerMiddlewareError(
   res: Response,
   next: any,
 ) {
-  return res.send(500).status(err.message);
+  return res.sendStatus(500);
 }

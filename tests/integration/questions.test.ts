@@ -4,10 +4,12 @@ import supertest from 'supertest';
 import faker from 'faker';
 import app from '../../src/app';
 import connection from '../../src/database';
-import { createQuestion } from '../factories/questionFactory';
+import * as questionFactory from '../factories/questionFactory';
+import * as studentFactory from '../factories/studentFactory';
 
 beforeAll(async () => {
   await connection.query(`
+  DELETE FROM sessions;
   DELETE FROM question_tags;
   DELETE FROM questions;
   DELETE FROM users;
@@ -34,7 +36,7 @@ describe('question post', () => {
 describe('get question by id', () => {
   let id: string = '';
   beforeAll(async () => {
-    id = await createQuestion();
+    id = await questionFactory.createQuestion();
   });
   it('should returns 400 for invalid param', async () => {
     const result = await supertest(app).get(
@@ -49,6 +51,45 @@ describe('get question by id', () => {
   it('should return 200 for success', async () => {
     const result = await supertest(app).get(`/questions/${id}`);
     expect(result.status).toBe(200);
+  });
+});
+
+describe('post answer', () => {
+  it('should return 400 for invalid params', async () => {
+    const result = await supertest(app).post(
+      `/questions/${faker.datatype.number()}`,
+    );
+    expect(result.status).toBe(400);
+  });
+  it('should return 403 for no authorization', async () => {
+    const body = {
+      answer: faker.random.words(),
+    };
+    const result = await supertest(app)
+      .post(`/questions/${faker.datatype.number()}`)
+      .send(body);
+    expect(result.status).toBe(403);
+  });
+  it('should return 401 for invalid authorization', async () => {
+    const body = {
+      answer: faker.random.words(),
+    };
+    const result = await supertest(app)
+      .post(`/questions/${faker.datatype.number()}`)
+      .send(body)
+      .set('Authorization', `Bearer ${faker.datatype.uuid()}`);
+    expect(result.status).toBe(401);
+  });
+  it('should return 404 for invalid question', async () => {
+    const token: string = await studentFactory.createToken();
+    const body = {
+      answer: faker.random.words(),
+    };
+    const result = await supertest(app)
+      .post(`/questions/${faker.datatype.number()}`)
+      .send(body)
+      .set('Authorization', `Bearer ${token}`);
+    expect(result.status).toBe(404);
   });
 });
 
