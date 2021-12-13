@@ -19,6 +19,12 @@ async function insertNewAnswer({ id, answer, token }: PostAnswer) {
   if (questions.rowCount === 0) {
     throw new ParamError('question not found');
   }
+  await connection.query(
+    `
+    UPDATE users SET answers = answers + 1 WHERE id = $1
+  `,
+    [userId],
+  );
   const result = await connection.query(
     `
     INSERT INTO answers (question_id, answered_by, answered_at, answer)

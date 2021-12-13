@@ -15,6 +15,7 @@ CREATE TABLE public.users (
 	"id" serial NOT NULL,
 	"student" varchar(255) NOT NULL,
 	"class_id" integer NOT NULL,
+	"answers" bigint NOT NULL DEFAULT '0',
 	CONSTRAINT "users_pk" PRIMARY KEY ("id")
 ) WITH (
   OIDS=FALSE
