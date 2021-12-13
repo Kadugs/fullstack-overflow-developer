@@ -12,6 +12,7 @@ afterAll(async () => {
   DELETE FROM answers;
   DELETE FROM sessions;
   DELETE FROM question_tags;
+  DELETE FROM tags WHERE id > 4;
   DELETE FROM questions;
   DELETE FROM users;
   `);
@@ -141,6 +142,19 @@ describe('test tags', () => {
       tag: faker.name.findName(),
     };
     const result = await supertest(app).post('/tags').send(body);
+    expect(result.status).toBe(201);
+  });
+});
+describe('test classes', () => {
+  it('should return 200 for get classes', async () => {
+    const result = await supertest(app).get('/classes');
+    expect(result.status).toBe(200);
+  });
+  it('should return 201 for valid params', async () => {
+    const body = {
+      class: faker.name.findName(),
+    };
+    const result = await supertest(app).post('/classes').send(body);
     expect(result.status).toBe(201);
   });
 });
