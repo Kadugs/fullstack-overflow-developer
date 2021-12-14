@@ -1,9 +1,0 @@
-{
-  "compilerOptions": {
-    "noImplicitAny": true,
-    "esModuleInterop": true,
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "target": "ES6"
-  }
-}
